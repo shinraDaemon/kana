@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiragana & Katakana</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between transition-colors duration-300">
+
+    <!-- HEADER -->
+    <header class="bg-slate-900 border-b border-slate-800 shadow-md sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold flex items-center gap-2 text-indigo-400">
+                    🇯🇵 Huruf Jepang
+                </h1>
+                <p class="text-slate-400 text-xs mt-0.5" id="header-sub">Hiragana, Katakana, Dakuon, Youon, & Aturan Spesial (ID / EN)</p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <!-- Tombol Ganti Tema (Dark/Light) -->
+                <button onclick="toggleTheme()" id="theme-btn" class="p-2 rounded-lg bg-slate-800 text-yellow-400 hover:bg-slate-700 transition text-sm flex items-center gap-1 font-medium" title="Ganti Tema">
+                    ☀️ <span id="theme-text" class="text-xs">Light</span>
+                </button>
+
+                <!-- Pilihan Bahasa Terjemahan -->
+                <div class="flex items-center gap-1 bg-slate-800 p-1 rounded-lg border border-slate-700">
+                    <button onclick="setLang('id')" id="btn-id" class="px-3 py-1 rounded bg-indigo-600 text-white font-semibold text-xs transition">ID</button>
+                    <button onclick="setLang('en')" id="btn-en" class="px-3 py-1 rounded text-slate-400 hover:text-white font-semibold text-xs transition">EN</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- KONTEN UTAMA -->
+    <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
+        
+        <!-- Navigasi Jenis Kategori / Tab -->
+        <div class="flex flex-wrap justify-center gap-2 mb-6">
+            <button onclick="switchTab('hiragana')" id="tab-hiragana" class="px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition bg-indigo-600 text-white shadow-sm">
+                Hiragana Dasar
+            </button>
+            <button onclick="switchTab('katakana')" id="tab-katakana" class="px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition bg-slate-900 text-slate-400 hover:text-white border border-slate-800">
+                Katakana Dasar
+            </button>
+            <button onclick="switchTab('dakuon')" id="tab-dakuon" class="px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition bg-slate-900 text-slate-400 hover:text-white border border-slate-800">
+                Dakuon & Handakuon
+            </button>
+            <button onclick="switchTab('youon')" id="tab-youon" class="px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition bg-slate-900 text-slate-400 hover:text-white border border-slate-800">
+                Youon (Gabungan)
+            </button>
+            <button onclick="switchTab('special')" id="tab-special" class="px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition bg-slate-900 text-slate-400 hover:text-white border border-slate-800">
+                Sokuon & Choonpu
+            </button>
+        </div>
+
+        <!-- Deskripsi Tab -->
+        <div id="tab-desc" class="bg-slate-900 border-l-4 border-indigo-500 p-4 rounded-r-xl mb-8 text-sm text-slate-300 border border-slate-800 shadow-sm">
+            <!-- Diisi dinamis via JS -->
+        </div>
+
+        <!-- Grid Kartu Huruf / Konten -->
+        <div id="content-container">
+            <!-- Diisi dinamis via JS -->
+        </div>
+
+    </main>
+
+    <!-- MODAL DETAIL KOSAKATA -->
+    <div id="detail-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl font-bold">&times;</button>
+            
+            <div class="text-center">
+                <div id="modal-char" class="text-6xl font-bold text-indigo-400 mb-2">あ</div>
+                <div id="modal-romaji" class="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-4">a</div>
+                
+                <div class="border-t border-slate-800 pt-4 text-left">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2" id="label-example">Contoh Kosakata</h4>
+                    <div class="bg-slate-950 border border-slate-800 p-3.5 rounded-xl flex items-center justify-between">
+                        <div>
+                            <span id="modal-word-jp" class="text-xl font-bold text-slate-100 block">--</span>
+                            <span id="modal-word-reading" class="text-xs text-slate-400">--</span>
+                        </div>
+                        <div class="text-right">
+                            <span id="modal-word-trans" class="text-sm font-medium text-indigo-400 block">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="closeModal()" class="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition text-sm">
+                Tutup / Close
+            </button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 border-t border-slate-800 mt-12 py-6 text-center text-xs text-slate-500">
+        <p id="footer-text">Copyright &copy; 2026 shinraDaemon.</p>
+    </footer>
+
+    <!-- LOGIKA JAVASCRIPT -->
+    <script>
+        const data = {
+            id: {
+                tabHiraganaDesc: "<b>Hiragana Dasar</b> digunakan untuk kata-kata asli bahasa Jepang, tata bahasa, dan partikel. Klik kartu untuk melihat contoh kosakata!",
+                tabKatakanaDesc: "<b>Katakana Dasar</b> digunakan untuk menulis kata serapan dari bahasa asing, nama negara, dan istilah asing/teknis. Klik kartu untuk melihat detail!",
+                tabDakuonDesc: "<b>Dakuon</b> (tanda petik ゛) mengubah bunyi konsonan lunak (G, Z, D, B) dan <b>Handakuon</b> (tanda lingkaran ゜) mengubah bunyi huruf baris H menjadi P.",
+                tabYouonDesc: "<b>Youon (Yoon)</b> adalah penggabungan huruf konsonan berakhiran 'i' (seperti ki, shi, ni) dengan huruf kecil ya, yu, yo untuk menghasilkan satu suku kata gabungan.",
+                tabSpecialDesc: "Aturan spesial penulisan: <b>Sokuon</b> (tsu kecil `っ/ッ`) untuk konsonan ganda/penekanan, dan <b>Choonpu</b> (`ー`) sebagai tanda vokal panjang khusus Katakana.",
+                exampleLabel: "Contoh Kosakata",
+                
+                characters: [
+                    { jp: "あ", romaji: "a", wordJp: "あさ", wordRead: "asa", trans: "Pagi / Morning" },
+                    { jp: "い", romaji: "i", wordJp: "いぬ", wordRead: "inu", trans: "Anjing / Dog" },
+                    { jp: "う", romaji: "u", wordJp: "うみ", wordRead: "umi", trans: "Laut / Sea" },
+                    { jp: "え", romaji: "e", wordJp: "えき", wordRead: "eki", trans: "Stasiun / Station" },
+                    { jp: "お", romaji: "o", wordJp: "おんな", wordRead: "onna", trans: "Perempuan / Woman" },
+                    { jp: "か", romaji: "ka", wordJp: "かみ", wordRead: "kami", trans: "Kertas / Rambut" },
+                    { jp: "き", romaji: "ki", wordJp: "き", wordRead: "ki", trans: "Pohon / Tree" },
+                    { jp: "く", romaji: "ku", wordJp: "くつ", wordRead: "kutsu", trans: "Sepatu / Shoes" },
+                    { jp: "け", romaji: "ke", wordJp: "けいたい", wordRead: "keitai", trans: "Ponsel / Mobile Phone" },
+                    { jp: "こ", romaji: "ko", wordJp: "こども", wordRead: "kodomo", trans: "Anak-anak / Children" },
+                    { jp: "さ", romaji: "sa", wordJp: "さけ", wordRead: "sake", trans: "Ikan / Sake" },
+                    { jp: "し", romaji: "shi", wordJp: "しお", wordRead: "shio", trans: "Garam / Salt" },
+                    { jp: "す", romaji: "su", wordJp: "すし", wordRead: "sushi", trans: "Sushi" },
+                    { jp: "せ", romaji: "se", wordJp: "せんせい", wordRead: "sensei", trans: "Guru / Teacher" },
+                    { jp: "そ", romaji: "so", wordJp: "そら", wordRead: "sora", trans: "Langit / Sky" },
+                    { jp: "た", romaji: "ta", wordJp: "たいこ", wordRead: "taiko", trans: "Drum Jepang" },
+                    { jp: "ち", romaji: "chi", wordJp: "ちizu", wordRead: "chizu", trans: "Peta / Map" },
+                    { jp: "つ", romaji: "tsu", wordJp: "つくえ", wordRead: "tsukue", trans: "Meja / Desk" },
+                    { jp: "て", romaji: "te", wordJp: "てがみ", wordRead: "tegami", trans: "Surat / Letter" },
+                    { jp: "と", romaji: "to", wordJp: "とけい", wordRead: "tokei", trans: "Jam / Clock" },
+                    { jp: "な", romaji: "na", wordJp: "なす", wordRead: "nasu", trans: "Terong / Eggplant" },
+                    { jp: "に", romaji: "ni", wordJp: "にく", wordRead: "niku", trans: "Daging / Meat" },
+                    { jp: "ぬ", romaji: "nu", wordJp: "ぬいぐる", wordRead: "nuigurumi", trans: "Boneka / Plush" },
+                    { jp: "ね", romaji: "ne", wordJp: "ねこ", wordRead: "neko", trans: "Kucing / Cat" },
+                    { jp: "の", romaji: "no", wordJp: "ノート", wordRead: "nooto", trans: "Buku Catatan / Notebook" },
+                    { jp: "は", romaji: "ha", wordJp: "はな", wordRead: "hana", trans: "Bunga / Hidung" },
+                    { jp: "ひ", romaji: "hi", wordJp: "ひこうき", wordRead: "hikouki", trans: "Pesawat / Airplane" },
+                    { jp: "ふ", romaji: "fu", wordJp: "ふじさん", wordRead: "fujisan", trans: "Gunung Fuji" },
+                    { jp: "へ", romaji: "he", wordJp: "へや", wordRead: "heya", trans: "Kamar / Room" },
+                    { jp: "ほ", romaji: "ho", wordJp: "ほし", wordRead: "hoshi", trans: "Bintang / Star" },
+                    { jp: "ま", romaji: "ma", wordJp: "まど", wordRead: "mado", trans: "Jendela / Window" },
+                    { jp: "み", romaji: "mi", wordJp: "みかん", wordRead: "mikan", trans: "Jeruk Mandarin" },
+                    { jp: "む", romaji: "mu", wordJp: "むし", wordRead: "mushi", trans: "Serangga / Insect" },
+                    { jp: "め", romaji: "me", wordJp: "めがね", wordRead: "megane", trans: "Kacamata / Glasses" },
+                    { jp: "も", romaji: "mo", wordJp: "もり", wordRead: "mori", trans: "Hutan / Forest" },
+                    { jp: "や", romaji: "ya", wordJp: "やま", wordRead: "yama", trans: "Gunung / Mountain" },
+                    { jp: "ゆ", romaji: "yu", wordJp: "ゆき", wordRead: "yuki", trans: "Salju / Snow" },
+                    { jp: "よ", romaji: "yo", wordJp: "よる", wordRead: "yoru", trans: "Malam / Night" },
+                    { jp: "ら", romaji: "ra", wordJp: "らくだ", wordRead: "rakuda", trans: "Unta / Camel" },
+                    { jp: "り", romaji: "ri", wordJp: "りんご", wordRead: "ringo", trans: "Apel / Apple" },
+                    { jp: "る", romaji: "ru", wordJp: "るす", wordRead: "rusu", trans: "Tidak di rumah" },
+                    { jp: "れ", romaji: "re", wordJp: "れきし", wordRead: "rekishi", trans: "Sejarah / History" },
+                    { jp: "ろ", romaji: "ro", wordJp: "ろうそく", wordRead: "rousoku", trans: "Lilin / Candle" },
+                    { jp: "わ", romaji: "wa", wordJp: "わに", wordRead: "wani", trans: "Buaya / Crocodile" },
+                    { jp: "を", romaji: "wo", wordJp: "ほんをよむ", wordRead: "hon wo yomu", trans: "Partikel Objek" },
+                    { jp: "ん", romaji: "n", wordJp: "にほん", wordRead: "nihon", trans: "Jepang / Japan" }
+                ],
+                katakana: [
+                    { jp: "ア", romaji: "a", wordJp: "アイス", wordRead: "aisu", trans: "Es / Ice Cream" },
+                    { jp: "イ", romaji: "i", wordJp: "インク", wordRead: "inku", trans: "Tinta / Ink" },
+                    { jp: "ウ", romaji: "u", wordJp: "ウール", wordRead: "uuru", trans: "Wol / Wool" },
+                    { jp: "エ", romaji: "e", wordJp: "エレベーター", wordRead: "erebeetaa", trans: "Lift / Elevator" },
+                    { jp: "オ", romaji: "o", wordJp: "オレンジ", wordRead: "orenji", trans: "Jeruk / Orange" },
+                    { jp: "カ", romaji: "ka", wordJp: "カメラ", wordRead: "kamera", trans: "Kamera / Camera" },
+                    { jp: "キ", romaji: "ki", wordJp: "キウイ", wordRead: "kiui", trans: "Buah Kiwi / Kiwi" },
+                    { jp: "ク", romaji: "ku", wordJp: "クラス", wordRead: "kurasu", trans: "Kelas / Class" },
+                    { jp: "ケ", romaji: "ke", wordJp: "ケーキ", wordRead: "keeki", trans: "Kue / Cake" },
+                    { jp: "コ", romaji: "ko", wordJp: "コーヒー", wordRead: "koohii", trans: "Kopi / Coffee" },
+                    { jp: "サ", romaji: "sa", wordJp: "サラダ", wordRead: "sarada", trans: "Salad" },
+                    { jp: "シ", romaji: "shi", wordJp: "シャツ", wordRead: "shatsu", trans: "Kemeja / Shirt" },
+                    { jp: "ス", romaji: "su", wordJp: "スープ", wordRead: "suupu", trans: "Sup / Soup" },
+                    { jp: "セ", romaji: "se", wordJp: "ゼロ", wordRead: "zero", trans: "Nol / Zero" },
+                    { jp: "ソ", romaji: "so", wordJp: "ソファー", wordRead: "sofaa", trans: "Sofa" },
+                    { jp: "タ", romaji: "ta", wordJp: "タクシー", wordRead: "takushii", trans: "Taksi / Taxi" },
+                    { jp: "チ", romaji: "chi", wordJp: "チーズ", wordRead: "chiizu", trans: "Keju / Cheese" },
+                    { jp: "ツ", romaji: "tsu", wordJp: "ツリー", wordRead: "tsurii", trans: "Pohon Natal / Tree" },
+                    { jp: "テ", romaji: "te", wordJp: "テレビ", wordRead: "terebi", trans: "Televisi / TV" },
+                    { jp: "ト", romaji: "to", wordJp: "トマト", wordRead: "tomato", trans: "Tomat / Tomato" },
+                    { jp: "ナ", romaji: "na", wordJp: "ナイフ", wordRead: "naifu", trans: "Pisau / Knife" },
+                    { jp: "ニ", romaji: "ni", wordJp: "ニュース", wordRead: "nyuusu", trans: "Berita / News" },
+                    { jp: "ヌ", romaji: "nu", wordJp: "ヌードル", wordRead: "nuudoru", trans: "Mi / Noodle" },
+                    { jp: "ネ", romaji: "ne", wordJp: "ネクタイ", wordRead: "nekutai", trans: "Dasi / Necktie" },
+                    { jp: "ノ", romaji: "no", wordJp: "ノート", wordRead: "nooto", trans: "Buku Catatan / Notebook" },
+                    { jp: "ハ", romaji: "ha", wordJp: "ハンバーガー", wordRead: "hanbaagaa", trans: "Hamburger" },
+                    { jp: "ヒ", romaji: "hi", wordJp: "ヒーター", wordRead: "hiitaa", trans: "Pemanas / Heater" },
+                    { jp: "フ", romaji: "fu", wordJp: "フォーク", wordRead: "fooku", trans: "Garpu / Fork" },
+                    { jp: "ヘ", romaji: "he", wordJp: "ヘルメット", wordRead: "herumetto", trans: "Helm / Helmet" },
+                    { jp: "ホ", romaji: "ho", wordJp: "ホテル", wordRead: "hoteru", trans: "Hotel" },
+                    { jp: "マ", romaji: "ma", wordJp: "マスク", wordRead: "masuku", trans: "Masker / Mask" },
+                    { jp: "ミ", romaji: "mi", wordJp: "ミルク", wordRead: "miruku", trans: "Susu / Milk" },
+                    { jp: "ム", romaji: "mu", wordJp: "ミュージック", wordRead: "myuujikku", trans: "Musik / Music" },
+                    { jp: "メ", romaji: "me", wordJp: "メロン", wordRead: "meron", trans: "Melon" },
+                    { jp: "モ", romaji: "mo", wordJp: "モデル", wordRead: "moderu", trans: "Model" },
+                    { jp: "ヤ", romaji: "ya", wordJp: "ヨット", wordRead: "yotto", trans: "Yacht" },
+                    { jp: "ユ", romaji: "yu", wordJp: "ユニフォーム", wordRead: "yunifoomu", trans: "Seragam / Uniform" },
+                    { jp: "ヨ", romaji: "yo", wordJp: "ヨーグルト", wordRead: "yooguruto", trans: "Yogurt" },
+                    { jp: "ラ", romaji: "ra", wordJp: "ラジオ", wordRead: "rajio", trans: "Radio" },
+                    { jp: "リ", romaji: "ri", wordJp: "リモコン", wordRead: "rimokon", trans: "Remote Control" },
+                    { jp: "ル", romaji: "ru", wordJp: "ルール", wordRead: "ruuru", trans: "Aturan / Rule" },
+                    { jp: "レ", romaji: "re", wordJp: "レモン", wordRead: "remon", trans: "Lemon" },
+                    { jp: "ロ", romaji: "ro", wordJp: "ロボット", wordRead: "robotto", trans: "Robot" },
+                    { jp: "ワ", romaji: "wa", wordJp: "ワイン", wordRead: "wain", trans: "Anggur / Wine" },
+                    { jp: "ヲ", romaji: "wo", wordJp: "ヲ", wordRead: "wo", trans: "Partikel (Katakana)" },
+                    { jp: "ン", romaji: "n", wordJp: "ペン", wordRead: "pen", trans: "Pena / Pen" }
+                ],
+                dakuon: [
+                    { jp: "が / ガ", romaji: "ga", wordJp: "がくせい / ガクセイ", wordRead: "gakusei", trans: "Pelajar / Student" },
+                    { jp: "ぎ / ギ", romaji: "gi", wordJp: "ぎんこう / ギンコウ", wordRead: "ginkou", trans: "Bank" },
+                    { jp: "ぐ / グ", romaji: "gu", wordJp: "ぐんま / グンマ", wordRead: "Gunma", trans: "Prefektur Gunma" },
+                    { jp: "げ / ゲ", romaji: "ge", wordJp: "げんき / GENKI", wordRead: "genki", trans: "Sehat / Healthy" },
+                    { jp: "ご / ゴ", romaji: "go", wordJp: "ごはん / ゴハン", wordRead: "gohan", trans: "Nasi / Nasi putih" },
+                    { jp: "ざ / ザ", romaji: "za", wordJp: "ざっし / ザッシ", wordRead: "zasshi", trans: "Majalah / Magazine" },
+                    { jp: "じ / ジ", romaji: "ji", wordJp: "じかん / ジカン", wordRead: "jikan", trans: "Waktu / Time" },
+                    { jp: "ず / ズ", romaji: "zu", wordJp: "ずぼん / ズボン", wordRead: "zubon", trans: "Celana / Pants" },
+                    { jp: "ぜ / ゼ", romaji: "ze", wordJp: "ぜんぶ / ゼンプ", wordRead: "zenbu", trans: "Semuanya / All" },
+                    { jp: "ぞ / ゾ", romaji: "zo", wordJp: "ぞう / ゾウ", wordRead: "zou", trans: "Gajah / Elephant" },
+                    { jp: "だ / ダ", romaji: "da", wordJp: "だいがく / ダイガク", wordRead: "daigaku", trans: "Universitas / University" },
+                    { jp: "ぢ / ヂ", romaji: "ji / di", wordJp: "はぢめ / ハジメ", wordRead: "hajime", trans: "Mulai / Beginning" },
+                    { jp: "づ / ヅ", romaji: "zu / du", wordJp: "つづく / ツヅク", wordRead: "tsuzuku", trans: "Berlanjut / Continue" },
+                    { jp: "で / デ", romaji: "de", wordJp: "でんわ / デンワ", wordRead: "denwa", trans: "Telepon / Phone" },
+                    { jp: "ど / ド", romaji: "do", wordJp: "ドア / ドア", wordRead: "doa", trans: "Pintu / Door" },
+                    { jp: "ば / バ", romaji: "ba", wordJp: "かばん / カバン", wordRead: "kaban", trans: "Tas / Bag" },
+                    { jp: "び / ビ", romaji: "bi", wordJp: "びょういん / ビョウイン", wordRead: "byouin", trans: "Rumah Sakit / Hospital" },
+                    { jp: "ぶ / ブ", romaji: "bu", wordJp: "ぶた / ブタ", wordRead: "buta", trans: "Babi / Pig" },
+                    { jp: "べ / ベ", romaji: "be", wordJp: "べんとう / ベントウ", wordRead: "bentou", trans: "Bekal / Lunch box" },
+                    { jp: "ぼ / ボ", romaji: "bo", wordJp: "ぼうし / ボウシ", wordRead: "boushi", trans: "Topi / Hat" },
+                    { jp: "ぱ / パ", romaji: "pa", wordJp: "パン / パン", wordRead: "pan", trans: "Roti / Bread" },
+                    { jp: "ぴ / ピ", romaji: "pi", wordJp: "ぴあの / ピアノ", wordRead: "piano", trans: "Piano" },
+                    { jp: "ぷ / プ", romaji: "pu", wordJp: "ぷール / プール", wordRead: "puuru", trans: "Kolam renang / Pool" },
+                    { jp: "ぺ / ペ", romaji: "pe", wordJp: "ぺん / ペン", wordRead: "pen", trans: "Pena / Pen" },
+                    { jp: "ぽ / ポ", romaji: "po", wordJp: "ぽすと / ポスト", wordRead: "posuto", trans: "Kotak pos / Mailbox" }
+                ],
+                youon: [
+                    { jp: "きゃ / キャ", romaji: "kya", wordJp: "きゃく / キャク", wordRead: "kyaku", trans: "Tamu / Guest" },
+                    { jp: "きゅ / キュ", romaji: "kyu", wordJp: "きゅうり / キュウリ", wordRead: "kyuuri", trans: "Timun / Cucumber" },
+                    { jp: "きょ / キョ", romaji: "kyo", wordJp: "きょうと / キョウト", wordRead: "Kyouto", trans: "Kyoto (Kota)" },
+                    { jp: "しゃ / シャ", romaji: "sha", wordJp: "しゃしん / シャシン", wordRead: "shashin", trans: "Foto / Photo" },
+                    { jp: "しゅ / シュ", romaji: "shu", wordJp: "しゅみ / シュミ", wordRead: "shumi", trans: "Hobi / Hobby" },
+                    { jp: "しょ / ショ", romaji: "sho", wordJp: "しょくどう / ショクドウ", wordRead: "shokudou", trans: "Kantin / Cafeteria" },
+                    { jp: "ちゃ / チャ", romaji: "cha", wordJp: "おちゃ / オチャ", wordRead: "ocha", trans: "Teh hijau / Green tea" },
+                    { jp: "ちゅ / チュ", romaji: "chu", wordJp: "ちゅうがく / チュウガク", wordRead: "chuugaku", trans: "SMP / Junior high" },
+                    { jp: "ちょ / チョ", romaji: "cho", wordJp: "ちょきん / チョキン", wordRead: "chokin", trans: "Tabungan / Savings" },
+                    { jp: "にゃ / ニャ", romaji: "nya", wordJp: "にゃんこ / ニャンコ", wordRead: "nyanko", trans: "Anak kucing / Kitten" },
+                    { jp: "にゅ / ニュ", romaji: "nyu", wordJp: "にゅうがく / ニュウガク", wordRead: "nyuugaku", trans: "Masuk sekolah" },
+                    { jp: "にょ / ニョ", romaji: "nyo", wordJp: "にょきにょき", wordRead: "nyoki nyoki", trans: "Tumbuh pesat" },
+                    { jp: "ひゃ / ヒャ", romaji: "hya", wordJp: "ひゃく / ヒャク", wordRead: "hyaku", trans: "Seratus / Hundred" },
+                    { jp: "ひゅ / ヒュ", romaji: "hyu", wordJp: "ひゅうが", wordRead: "Hyuuga", trans: "Nama tempat" },
+                    { jp: "ひょ / ヒョ", romaji: "hyo", wordJp: "ひょっとこ", wordRead: "hyottoko", trans: "Topeng tradisional" },
+                    { jp: "みゃ / ミャ", romaji: "mya", wordJp: "みゃく / ミャク", wordRead: "myaku", trans: "Denyut / Pulse" },
+                    { jp: "みゅ / ミュ", romaji: "myu", wordJp: "ぎゅうにゅう", wordRead: "gyuunyuu", trans: "Susu sapi" },
+                    { jp: "みょ / ミョ", romaji: "myo", wordJp: "みょうじ / ミョウジ", wordRead: "myouji", trans: "Nama keluarga" },
+                    { jp: "りゃ / リャ", romaji: "rya", wordJp: "りゃくす / リャクス", wordRead: "ryakusu", trans: "Menyingkat" },
+                    { jp: "りゅ / リュ", romaji: "ryu", wordJp: "りゅう / リュウ", wordRead: "ryuu", trans: "Naga / Dragon" },
+                    { jp: "りょ / リョ", romaji: "ryo", wordJp: "りょこう / リョコウ", wordRead: "ryokou", trans: "Wisata / Travel" }
+                ],
+                special: [
+                    { jp: "っ / ッ (Sokuon)", romaji: "Konsonan Ganda", wordJp: "きって / ざっし", wordRead: "kitte / zasshi", trans: "Perlambang jeda konsonan ganda (Stempel / Majalah)" },
+                    { jp: "ー (Choonpu)", romaji: "Vokal Panjang", wordJp: "コーヒー / ケーキ", wordRead: "koohii / keeki", trans: "Tanda garis perpanjangan vokal khusus Katakana (Kopi / Kue)" }
+                ]
+            },
+            en: {
+                tabHiraganaDesc: "<b>Basic Hiragana</b> is used for native Japanese words, grammar, and particles. Click any card to view example words!",
+                tabKatakanaDesc: "<b>Basic Katakana</b> is used for foreign loanwords, country names, and technical terms. Click any card to view details!",
+                tabDakuonDesc: "<b>Dakuon</b> (voiced marks ゛) change soft consonants (G, Z, D, B) and <b>Handakuon</b> (semi-voiced circle ゜) turn the H row into P sounds.",
+                tabYouonDesc: "<b>Youon (Combo)</b> combines consonant-i sounds (like ki, shi, ni) with small ya, yu, yo to form a single blended syllable.",
+                tabSpecialDesc: "Special writing rules: <b>Sokuon</b> (small tsu `っ/ッ`) for double consonant pauses, and <b>Choonpu</b> (`ー`) for Katakana vowel elongation.",
+                exampleLabel: "Example Word",
+                
+                characters: [
+                    { jp: "あ", romaji: "a", wordJp: "あさ", wordRead: "asa", trans: "Morning" },
+                    { jp: "い", romaji: "i", wordJp: "いぬ", wordRead: "inu", trans: "Dog" },
+                    { jp: "う", romaji: "u", wordJp: "うみ", wordRead: "umi", trans: "Sea" },
+                    { jp: "え", romaji: "e", wordJp: "えき", wordRead: "eki", trans: "Station" },
+                    { jp: "お", romaji: "o", wordJp: "おんな", wordRead: "onna", trans: "Woman" },
+                    { jp: "か", romaji: "ka", wordJp: "かみ", wordRead: "kami", trans: "Paper / Hair" },
+                    { jp: "き", romaji: "ki", wordJp: "き", wordRead: "ki", trans: "Tree" },
+                    { jp: "く", romaji: "ku", wordJp: "くつ", wordRead: "kutsu", trans: "Shoes" },
+                    { jp: "け", romaji: "ke", wordJp: "けいたい", wordRead: "keitai", trans: "Mobile Phone" },
+                    { jp: "こ", romaji: "ko", wordJp: "こども", wordRead: "kodomo", trans: "Children" },
+                    { jp: "さ", romaji: "sa", wordJp: "さけ", wordRead: "sake", trans: "Salmon / Sake" },
+                    { jp: "し", romaji: "shi", wordJp: "しお", wordRead: "shio", trans: "Salt" },
+                    { jp: "す", romaji: "su", wordJp: "すし", wordRead: "sushi", trans: "Sushi" },
+                    { jp: "せ", romaji: "se", wordJp: "せんせい", wordRead: "sensei", trans: "Teacher" },
+                    { jp: "そ", romaji: "so", wordJp: "そら", wordRead: "sora", trans: "Sky" },
+                    { jp: "た", romaji: "ta", wordJp: "たいこ", wordRead: "taiko", trans: "Japanese Drum" },
+                    { jp: "ち", romaji: "chi", wordJp: "ちizu", wordRead: "chizu", trans: "Map" },
+                    { jp: "つ", romaji: "tsu", wordJp: "つくえ", wordRead: "tsukue", trans: "Desk" },
+                    { jp: "て", romaji: "te", wordJp: "てがみ", wordRead: "tegami", trans: "Letter" },
+                    { jp: "と", romaji: "to", wordJp: "とけい", wordRead: "tokei", trans: "Clock / Watch" },
+                    { jp: "な", romaji: "na", wordJp: "なす", wordRead: "nasu", trans: "Eggplant" },
+                    { jp: "に", romaji: "ni", wordJp: "にく", wordRead: "niku", trans: "Meat" },
+                    { jp: "ぬ", romaji: "nu", wordJp: "ぬいぐる", wordRead: "nuigurumi", trans: "Plush Toy" },
+                    { jp: "ね", romaji: "ne", wordJp: "ねこ", wordRead: "neko", trans: "Cat" },
+                    { jp: "の", romaji: "no", wordJp: "ノート", wordRead: "nooto", trans: "Notebook" },
+                    { jp: "は", romaji: "ha", wordJp: "はな", wordRead: "hana", trans: "Flower / Nose" },
+                    { jp: "ひ", romaji: "hi", wordJp: "ひこうき", wordRead: "hikouki", trans: "Airplane" },
+                    { jp: "ふ", romaji: "fu", wordJp: "ふじさん", wordRead: "fujisan", trans: "Mt. Fuji" },
+                    { jp: "へ", romaji: "he", wordJp: "へや", wordRead: "heya", trans: "Room" },
+                    { jp: "ほ", romaji: "ho", wordJp: "ほし", wordRead: "hoshi", trans: "Star" },
+                    { jp: "ま", romaji: "ma", wordJp: "まど", wordRead: "mado", trans: "Window" },
+                    { jp: "み", romaji: "mi", wordJp: "みかん", wordRead: "mikan", trans: "Mandarin Orange" },
+                    { jp: "む", romaji: "mu", wordJp: "むし", wordRead: "mushi", trans: "Insect" },
+                    { jp: "め", romaji: "me", wordJp: "めがね", wordRead: "megane", trans: "Glasses" },
+                    { jp: "も", romaji: "mo", wordJp: "もり", wordRead: "mori", trans: "Forest" },
+                    { jp: "や", romaji: "ya", wordJp: "やま", wordRead: "yama", trans: "Mountain" },
+                    { jp: "ゆ", romaji: "yu", wordJp: "ゆき", wordRead: "yuki", trans: "Snow" },
+                    { jp: "よ", romaji: "yo", wordJp: "よる", wordRead: "yoru", trans: "Night" },
+                    { jp: "ら", romaji: "ra", wordJp: "らくだ", wordRead: "rakuda", trans: "Camel" },
+                    { jp: "り", romaji: "ri", wordJp: "りんご", wordRead: "ringo", trans: "Apple" },
+                    { jp: "る", romaji: "ru", wordJp: "るす", wordRead: "rusu", trans: "Away from home" },
+                    { jp: "れ", romaji: "re", wordJp: "れきし", wordRead: "rekishi", trans: "History" },
+                    { jp: "ろ", romaji: "ro", wordJp: "ろうそく", wordRead: "rousoku", trans: "Candle" },
+                    { jp: "わ", romaji: "wa", wordJp: "わに", wordRead: "wani", trans: "Crocodile" },
+                    { jp: "を", romaji: "wo", wordJp: "ほんをよむ", wordRead: "hon wo yomu", trans: "Object Particle" },
+                    { jp: "ん", romaji: "n", wordJp: "にほん", wordRead: "nihon", trans: "Japan" }
+                ],
+                katakana: [
+                    { jp: "ア", romaji: "a", wordJp: "アイス", wordRead: "aisu", trans: "Ice Cream" },
+                    { jp: "イ", romaji: "i", wordJp: "インク", wordRead: "inku", trans: "Ink" },
+                    { jp: "ウ", romaji: "u", wordJp: "ウール", wordRead: "uuru", trans: "Wool" },
+                    { jp: "エ", romaji: "e", wordJp: "エレベーター", wordRead: "erebeetaa", trans: "Elevator" },
+                    { jp: "オ", romaji: "o", wordJp: "オレンジ", wordRead: "orenji", trans: "Orange" },
+                    { jp: "カ", romaji: "ka", wordJp: "カメラ", wordRead: "kamera", trans: "Camera" },
+                    { jp: "キ", romaji: "ki", wordJp: "キウイ", wordRead: "kiui", trans: "Kiwi" },
+                    { jp: "ク", romaji: "ku", wordJp: "クラス", wordRead: "kurasu", trans: "Class" },
+                    { jp: "ケ", romaji: "ke", wordJp: "ケーキ", wordRead: "keeki", trans: "Cake" },
+                    { jp: "コ", romaji: "ko", wordJp: "コーヒー", wordRead: "koohii", trans: "Coffee" },
+                    { jp: "サ", romaji: "sa", wordJp: "サラダ", wordRead: "sarada", trans: "Salad" },
+                    { jp: "シ", romaji: "shi", wordJp: "シャツ", wordRead: "shatsu", trans: "Shirt" },
+                    { jp: "ス", romaji: "su", wordJp: "スープ", wordRead: "suupu", trans: "Soup" },
+                    { jp: "セ", romaji: "se", wordJp: "ゼロ", wordRead: "zero", trans: "Zero" },
+                    { jp: "ソ", romaji: "so", wordJp: "ソファー", wordRead: "sofaa", trans: "Sofa" },
+                    { jp: "タ", romaji: "ta", wordJp: "タクシー", wordRead: "takushii", trans: "Taxi" },
+                    { jp: "チ", romaji: "chi", wordJp: "チーズ", wordRead: "chiizu", trans: "Cheese" },
+                    { jp: "ツ", romaji: "tsu", wordJp: "ツリー", wordRead: "tsurii", trans: "Tree" },
+                    { jp: "テ", romaji: "te", wordJp: "テレビ", wordRead: "terebi", trans: "TV" },
+                    { jp: "ト", romaji: "to", wordJp: "トマト", wordRead: "tomato", trans: "Tomato" },
+                    { jp: "ナ", romaji: "na", wordJp: "ナイフ", wordRead: "naifu", trans: "Knife" },
+                    { jp: "ニ", romaji: "ni", wordJp: "ニュース", wordRead: "nyuusu", trans: "News" },
+                    { jp: "ヌ", romaji: "nu", wordJp: "ヌードル", wordRead: "nuudoru", trans: "Noodle" },
+                    { jp: "ネ", romaji: "ne", wordJp: "ネクタイ", wordRead: "nekutai", trans: "Necktie" },
+                    { jp: "ノ", romaji: "no", wordJp: "ノート", wordRead: "nooto", trans: "Notebook" },
+                    { jp: "ハ", romaji: "ha", wordJp: "ハンバーガー", wordRead: "hanbaagaa", trans: "Hamburger" },
+                    { jp: "ヒ", romaji: "hi", wordJp: "ヒーター", wordRead: "hiitaa", trans: "Heater" },
+                    { jp: "フ", romaji: "fu", wordJp: "フォーク", wordRead: "fooku", trans: "Fork" },
+                    { jp: "ヘ", romaji: "he", wordJp: "ヘルメット", wordRead: "herumetto", trans: "Helmet" },
+                    { jp: "ホ", romaji: "ho", wordJp: "ホテル", wordRead: "hoteru", trans: "Hotel" },
+                    { jp: "マ", romaji: "ma", wordJp: "マスク", wordRead: "masuku", trans: "Mask" },
+                    { jp: "ミ", romaji: "mi", wordJp: "ミルク", wordRead: "miruku", trans: "Milk" },
+                    { jp: "ム", romaji: "mu", wordJp: "ミュージック", wordRead: "myuujikku", trans: "Music" },
+                    { jp: "メ", romaji: "me", wordJp: "メロン", wordRead: "meron", trans: "Melon" },
+                    { jp: "モ", romaji: "mo", wordJp: "モデル", wordRead: "moderu", trans: "Model" },
+                    { jp: "ヤ", romaji: "ya", wordJp: "ヨット", wordRead: "yotto", trans: "Yacht" },
+                    { jp: "ユ", romaji: "yu", wordJp: "ユニフォーム", wordRead: "yunifoomu", trans: "Uniform" },
+                    { jp: "ヨ", romaji: "yo", wordJp: "ヨーグルト", wordRead: "yooguruto", trans: "Yogurt" },
+                    { jp: "ラ", romaji: "ra", wordJp: "ラジオ", wordRead: "rajio", trans: "Radio" },
+                    { jp: "リ", romaji: "ri", wordJp: "リモコン", wordRead: "rimokon", trans: "Remote Control" },
+                    { jp: "ル", romaji: "ru", wordJp: "ルール", wordRead: "ruuru", trans: "Rule" },
+                    { jp: "レ", romaji: "re", wordJp: "レモン", wordRead: "remon", trans: "Lemon" },
+                    { jp: "ロ", romaji: "ro", wordJp: "ロボット", wordRead: "robotto", trans: "Robot" },
+                    { jp: "ワ", romaji: "wa", wordJp: "ワイン", wordRead: "wain", trans: "Wine" },
+                    { jp: "ヲ", romaji: "wo", wordJp: "ヲ", wordRead: "wo", trans: "Particle" },
+                    { jp: "ン", romaji: "n", wordJp: "ペン", wordRead: "pen", trans: "Pen" }
+                ],
+                dakuon: [
+                    { jp: "が / ガ", romaji: "ga", wordJp: "がくせい / ガクセイ", wordRead: "gakusei", trans: "Student" },
+                    { jp: "ぎ / ギ", romaji: "gi", wordJp: "ぎんこう / ギンコウ", wordRead: "ginkou", trans: "Bank" },
+                    { jp: "ぐ / グ", romaji: "gu", wordJp: "ぐんま / グンマ", wordRead: "Gunma", trans: "Gunma Prefecture" },
+                    { jp: "げ / ゲ", romaji: "ge", wordJp: "げんき / GENKI", wordRead: "genki", trans: "Healthy / Energetic" },
+                    { jp: "ご / ゴ", romaji: "go", wordJp: "ごはん / ゴハン", wordRead: "gohan", trans: "Rice / Meal" },
+                    { jp: "ざ / ザ", romaji: "za", wordJp: "ざっし / ザッシ", wordRead: "zasshi", trans: "Magazine" },
+                    { jp: "じ / ジ", romaji: "ji", wordJp: "じかん / ジカン", wordRead: "jikan", trans: "Time" },
+                    { jp: "ず / ズ", romaji: "zu", wordJp: "ずぼん / ズボン", wordRead: "zubon", trans: "Pants" },
+                    { jp: "ぜ / ゼ", romaji: "ze", wordJp: "ぜんぶ / ゼンプ", wordRead: "zenbu", trans: "All / Everything" },
+                    { jp: "ぞ / ゾ", romaji: "zo", wordJp: "ぞう / ゾウ", wordRead: "zou", trans: "Elephant" },
+                    { jp: "だ / ダ", romaji: "da", wordJp: "だいがく / ダイガク", wordRead: "daigaku", trans: "University" },
+                    { jp: "ぢ / ヂ", romaji: "ji / di", wordJp: "はぢめ / ハジメ", wordRead: "hajime", trans: "Beginning" },
+                    { jp: "づ / ヅ", romaji: "zu / du", wordJp: "つづく / ツヅク", wordRead: "tsuzuku", trans: "To continue" },
+                    { jp: "で / デ", romaji: "de", wordJp: "でんわ / デンワ", wordRead: "denwa", trans: "Phone" },
+                    { jp: "ど / ド", romaji: "do", wordJp: "ドア / ドア", wordRead: "doa", trans: "Door" },
+                    { jp: "ば / バ", romaji: "ba", wordJp: "かばん / カバン", wordRead: "kaban", trans: "Bag" },
+                    { jp: "び / ビ", romaji: "bi", wordJp: "びょういん / ビョウイン", wordRead: "byouin", trans: "Hospital" },
+                    { jp: "ぶ / ブ", romaji: "bu", wordJp: "ぶた / ブタ", wordRead: "buta", trans: "Pig" },
+                    { jp: "べ / ベ", romaji: "be", wordJp: "べんとう / ベントウ", wordRead: "bentou", trans: "Lunch box" },
+                    { jp: "ぼ / ボ", romaji: "bo", wordJp: "ぼうし / ボウシ", wordRead: "boushi", trans: "Hat" },
+                    { jp: "ぱ / パ", romaji: "pa", wordJp: "パン / パン", wordRead: "pan", trans: "Bread" },
+                    { jp: "ぴ / ピ", romaji: "pi", wordJp: "ぴあの / ピアノ", wordRead: "piano", trans: "Piano" },
+                    { jp: "ぷ / プ", romaji: "pu", wordJp: "ぷール / プール", wordRead: "puuru", trans: "Swimming pool" },
+                    { jp: "ぺ / ペ", romaji: "pe", wordJp: "ぺん / ペン", wordRead: "pen", trans: "Pen" },
+                    { jp: "ぽ / ポ", romaji: "po", wordJp: "ぽすと / ポスト", wordRead: "posuto", trans: "Mailbox" }
+                ],
+                youon: [
+                    { jp: "きゃ / キャ", romaji: "kya", wordJp: "きゃく / キャク", wordRead: "kyaku", trans: "Guest / Customer" },
+                    { jp: "きゅ / キュ", romaji: "kyu", wordJp: "きゅうり / キュウリ", wordRead: "kyuuri", trans: "Cucumber" },
+                    { jp: "きょ / キョ", romaji: "kyo", wordJp: "きょうと / キョウト", wordRead: "Kyouto", trans: "Kyoto (City)" },
+                    { jp: "しゃ / シャ", romaji: "sha", wordJp: "しゃしん / シャシン", wordRead: "shashin", trans: "Photograph" },
+                    { jp: "しゅ / シュ", romaji: "shu", wordJp: "しゅみ / シュミ", wordRead: "shumi", trans: "Hobby" },
+                    { jp: "しょ / ショ", romaji: "sho", wordJp: "しょくどう / ショクドウ", wordRead: "shokudou", trans: "Cafeteria" },
+                    { jp: "ちゃ / チャ", romaji: "cha", wordJp: "おちゃ / オチャ", wordRead: "ocha", trans: "Green tea" },
+                    { jp: "ちゅ / チュ", romaji: "chu", wordJp: "ちゅうがく / チュウガク", wordRead: "chuugaku", trans: "Junior High School" },
+                    { jp: "ちょ / チョ", romaji: "cho", wordJp: "ちょきん / チョキン", wordRead: "chokin", trans: "Savings" },
+                    { jp: "にゃ / ニャ", romaji: "nya", wordJp: "にゃんこ / ニャンコ", wordRead: "nyanko", trans: "Kitten" },
+                    { jp: "にゅ / ニュ", romaji: "nyu", wordJp: "にゅうがく / ニュウガク", wordRead: "nyuugaku", trans: "School enrollment" },
+                    { jp: "にょ / ニョ", romaji: "nyo", wordJp: "にょきにょき", wordRead: "nyoki nyoki", trans: "Sprouting rapidly" },
+                    { jp: "ひゃ / ヒャ", romaji: "hya", wordJp: "ひゃく / ヒャク", wordRead: "hyaku", trans: "Hundred" },
+                    { jp: "ひゅ / ヒュ", romaji: "hyu", wordJp: "ひゅうが", wordRead: "Hyuuga", trans: "Place name" },
+                    { jp: "ひょ / ヒョ", romaji: "hyo", wordJp: "ひょっとこ", wordRead: "hyottoko", trans: "Traditional mask" },
+                    { jp: "みゃ / ミャ", romaji: "mya", wordJp: "みゃく / ミャク", wordRead: "myaku", trans: "Pulse" },
+                    { jp: "みゅ / ミュ", romaji: "myu", wordJp: "ぎゅうにゅう", wordRead: "gyuunyuu", trans: "Milk" },
+                    { jp: "みょ / ミョ", romaji: "myo", wordJp: "みょうじ / ミョウジ", wordRead: "myouji", trans: "Surname" },
+                    { jp: "りゃ / リャ", romaji: "rya", wordJp: "りゃくす / リャクス", wordRead: "ryakusu", trans: "To abbreviate" },
+                    { jp: "りゅ / リュ", romaji: "ryu", wordJp: "りゅう / リュウ", wordRead: "ryuu", trans: "Dragon" },
+                    { jp: "りょ / リョ", romaji: "ryo", wordJp: "りょこう / リョコウ", wordRead: "ryokou", trans: "Travel / Trip" }
+                ],
+                special: [
+                    { jp: "っ / ッ (Sokuon)", romaji: "Double Consonant", wordJp: "きって / ざっし", wordRead: "kitte / zasshi", trans: "Indicates a pause/double consonant (Stamp / Magazine)" },
+                    { jp: "ー (Choonpu)", romaji: "Long Vowel", wordJp: "コーヒー / ケーキ", wordRead: "koohii / keeki", trans: "Katakana long vowel line extender (Coffee / Cake)" }
+                ]
+            }
+        };
+
+        let currentLang = 'id';
+        let currentTab = 'hiragana';
+        let isDarkMode = true;
+
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            const body = document.body;
+            const themeBtn = document.getElementById('theme-btn');
+            const header = document.querySelector('header');
+            const footer = document.querySelector('footer');
+            const tabDesc = document.getElementById('tab-desc');
+            const modalContent = document.querySelector('#detail-modal > div');
+
+            if (isDarkMode) {
+                body.className = "bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between transition-colors duration-300";
+                header.className = "bg-slate-900 border-b border-slate-800 shadow-md sticky top-0 z-40";
+                footer.className = "bg-slate-900 border-t border-slate-800 mt-12 py-6 text-center text-xs text-slate-500";
+                themeBtn.className = "p-2 rounded-lg bg-slate-800 text-yellow-400 hover:bg-slate-700 transition text-sm flex items-center gap-1 font-medium";
+                themeBtn.innerHTML = `☀️ <span id="theme-text" class="text-xs">Light</span>`;
+                tabDesc.className = "bg-slate-900 border-l-4 border-indigo-500 p-4 rounded-r-xl mb-8 text-sm text-slate-300 border border-slate-800 shadow-sm";
+                modalContent.className = "bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative";
+            } else {
+                body.className = "bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between transition-colors duration-300";
+                header.className = "bg-indigo-600 text-white shadow-md sticky top-0 z-40";
+                footer.className = "bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500";
+                themeBtn.className = "p-2 rounded-lg bg-indigo-700 text-white hover:bg-indigo-800 transition text-sm flex items-center gap-1 font-medium";
+                themeBtn.innerHTML = `🌙 <span id="theme-text" class="text-xs">Dark</span>`;
+                tabDesc.className = "bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded-r-lg mb-8 text-sm text-indigo-900 shadow-sm";
+                modalContent.className = "bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative";
+            }
+            renderContent();
+            updateTabStyles();
+        }
+
+        function setLang(lang) {
+            currentLang = lang;
+            if (lang === 'id') {
+                document.getElementById('btn-id').className = "px-3 py-1 rounded bg-indigo-600 text-white font-semibold text-xs transition";
+                document.getElementById('btn-en').className = "px-3 py-1 rounded text-slate-400 hover:text-white font-semibold text-xs transition";
+            } else {
+                document.getElementById('btn-en').className = "px-3 py-1 rounded bg-indigo-600 text-white font-semibold text-xs transition";
+                document.getElementById('btn-id').className = "px-3 py-1 rounded text-slate-400 hover:text-white font-semibold text-xs transition";
+            }
+            renderContent();
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            updateTabStyles();
+            renderContent();
+        }
+
+        function updateTabStyles() {
+            const tabs = ['hiragana', 'katakana', 'dakuon', 'youon', 'special'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === currentTab) {
+                    btn.className = "px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition bg-indigo-600 text-white shadow-sm";
+                } else {
+                    btn.className = isDarkMode 
+                        ? "px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
+                        : "px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition bg-white text-slate-600 hover:text-indigo-600 border border-slate-200 shadow-sm";
+                }
+            });
+        }
+
+        function renderContent() {
+            const t = data[currentLang];
+            
+            // Atur deskripsi sesuai tab
+            let descText = t.tabHiraganaDesc;
+            if (currentTab === 'katakana') descText = t.tabKatakanaDesc;
+            if (currentTab === 'dakuon') descText = t.tabDakuonDesc;
+            if (currentTab === 'youon') descText = t.tabYouonDesc;
+            if (currentTab === 'special') descText = t.tabSpecialDesc;
+
+            document.getElementById('tab-desc').innerHTML = descText;
+            document.getElementById('label-example').innerText = t.exampleLabel;
+
+            const container = document.getElementById('content-container');
+            container.innerHTML = '';
+
+            let items = t.characters;
+            if (currentTab === 'katakana') items = t.katakana;
+            if (currentTab === 'dakuon') items = t.dakuon;
+            if (currentTab === 'youon') items = t.youon;
+            if (currentTab === 'special') items = t.special;
+
+            const grid = document.createElement('div');
+            grid.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4";
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = isDarkMode 
+                    ? "bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-sm hover:shadow-indigo-500/10 hover:border-indigo-500/50 flex flex-col items-center justify-center cursor-pointer transition transform hover:-translate-y-1"
+                    : "bg-white border border-slate-100 p-5 rounded-2xl shadow-sm hover:shadow-md flex flex-col items-center justify-center cursor-pointer transition transform hover:-translate-y-1";
+                
+                card.onclick = () => openModal(item);
+                card.innerHTML = `
+                    <span class="text-3xl sm:text-4xl font-bold ${isDarkMode ? 'text-indigo-400' : 'text-indigo-600'} mb-1 text-center">${item.jp}</span>
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider text-center">${item.romaji}</span>
+                `;
+                grid.appendChild(card);
+            });
+            container.appendChild(grid);
+        }
+
+        function openModal(item) {
+            document.getElementById('modal-char').innerText = item.jp;
+            document.getElementById('modal-romaji').innerText = "Romaji: " + item.romaji;
+            document.getElementById('modal-word-jp').innerText = item.wordJp;
+            document.getElementById('modal-word-reading').innerText = "(" + item.wordRead + ")";
+            document.getElementById('modal-word-trans').innerText = item.trans;
+            
+            const modal = document.getElementById('detail-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('detail-modal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
+
+        // Inisialisasi awal
+        updateTabStyles();
+        renderContent();
+    </script>
+</body>
+</html>
